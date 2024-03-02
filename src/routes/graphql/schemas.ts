@@ -1,4 +1,11 @@
 import { Type } from '@fastify/type-provider-typebox';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { DefaultArgs } from '@prisma/client/runtime/library.js';
+import { GraphQLList, GraphQLObjectType } from 'graphql';
+import { UserType } from './types/user.js';
+import { MemberTypesType } from './types/memberType.js';
+import { PostType } from './types/post.js';
+import { ProfileType } from './types/profile.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -18,3 +25,49 @@ export const createGqlResponseSchema = {
     },
   ),
 };
+
+export function getRootQuery(prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>) {
+  const rootQuery = new GraphQLObjectType({
+    name: 'Query',
+    fields: {
+      memberTypes: {
+        type: new GraphQLList(MemberTypesType),
+        resolve: async () => {
+          return prisma.memberType.findMany();
+        }
+      },
+      users: {
+        type: new GraphQLList(UserType),
+        resolve: async () => {
+          return prisma.user.findMany();
+        }
+      },
+      posts: {
+        type: new GraphQLList(PostType),
+        resolve: async () => {
+          return prisma.post.findMany();
+        }
+      },
+      profiles: {
+        type: new GraphQLList(ProfileType),
+        resolve: async () => {
+          return prisma.profile.findMany();
+        }
+      },
+    }
+  })
+
+  return rootQuery
+}
+
+// export const rootQuery = new GraphQLObjectType({
+//   name: 'Query',
+//   fields: {
+//     users: {
+//       type: new GraphQLList(UserType),
+//       resolve: async () => {
+//         return prisma.user.findMany();
+//       }
+//     }
+//   }
+// })
