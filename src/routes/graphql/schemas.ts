@@ -57,7 +57,7 @@ export const rootQuery = new GraphQLObjectType({
         return context.profile.findMany();
       }
     },
-    
+
     memberType: {
       type: MemberTypesType,
       args: {
@@ -84,6 +84,7 @@ export const rootQuery = new GraphQLObjectType({
         },
       },
       resolve: async (_, { id }, context: PrismaClient) => {
+
         const user = await context.user.findUnique({
           where: {
             id: id as string,
@@ -120,6 +121,7 @@ export const rootQuery = new GraphQLObjectType({
         },
       },
       resolve: async (_, { id }, context: PrismaClient) => {
+
         const profile = await context.profile.findUnique({
           where: {
             id: id as string,
