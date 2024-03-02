@@ -1,5 +1,6 @@
 import { GraphQLFloat, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { UUIDType } from "./uuid.js";
+import { ProfileType } from "./profile.js";
 
 export const UserType = new GraphQLObjectType({
   name: 'User',
@@ -12,6 +13,9 @@ export const UserType = new GraphQLObjectType({
     },
     balance: {
       type: new GraphQLNonNull(GraphQLFloat)
+    },
+    profile: {
+      type: ProfileType
     }
   }
 })
