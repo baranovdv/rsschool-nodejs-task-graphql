@@ -7,7 +7,7 @@ import { MemberTypesType } from "./memberType.js";
 
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
-  fields: {
+  fields: () => ({
     id: {
       type: new GraphQLNonNull(UUIDType)
     },
@@ -35,5 +35,5 @@ export const ProfileType = new GraphQLObjectType({
         return memberType;
       }
     }
-  }
+  })
 })

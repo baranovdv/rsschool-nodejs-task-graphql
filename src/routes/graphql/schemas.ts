@@ -29,7 +29,7 @@ export const createGqlResponseSchema = {
 
 export const rootQuery = new GraphQLObjectType({
   name: 'Query',
-  fields: {
+  fields: () => ({
     memberTypes: {
       type: new GraphQLList(MemberTypesType),
       resolve: async (_, __, context: PrismaClient) => {
@@ -131,5 +131,5 @@ export const rootQuery = new GraphQLObjectType({
         return profile;
       }
     },
-  }
+  })
 })
