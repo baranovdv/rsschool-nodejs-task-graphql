@@ -1,8 +1,8 @@
 import { GraphQLFloat, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
-import { UUIDType } from "./uuid.js";
-import { ProfileType } from "./profile.js";
+import { UUIDType } from "../uuid.js";
+import { ProfileType } from "../profile/profile.js";
 import { PrismaClient } from "@prisma/client";
-import { PostType } from "./post.js";
+import { PostType } from "../post/post.js";
 
 export const UserType: GraphQLObjectType<{
   id: string,

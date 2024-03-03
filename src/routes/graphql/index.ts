@@ -1,6 +1,8 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { createGqlResponseSchema, gqlResponseSchema, rootQuery } from './schemas.js';
+import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
 import { GraphQLSchema, graphql } from 'graphql';
+import { rootQuery } from './schemas/query.js';
+import { rootMutation } from './schemas/mutation.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
@@ -16,7 +18,8 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
     },
     async handler(req) {
       const schema = new GraphQLSchema({
-        query: rootQuery
+        query: rootQuery,
+        mutation: rootMutation,
       })
 
       const source = req.body.query
