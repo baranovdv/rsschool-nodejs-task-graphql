@@ -154,29 +154,29 @@ await test('gql-mutations', async (t) => {
     t.ok(foundChangedProfile.isMale === changedIsMale);
   });
 
-  // await t.test('Change profile => fail; invalid dto.userId.', async (t) => {
-  //   const {
-  //     body: { errors },
-  //   } = await gqlQuery(app, {
-  //     query: `mutation ($id: UUID!, $dto: ChangeProfileInput!) {
-  //       changeProfile(id: $id, dto: $dto) {
-  //           id
-  //       }
-  //   }`,
-  //     variables: {
-  //       id: randomUUID(),
-  //       dto: {
-  //         userId: randomUUID(),
-  //       },
-  //     },
-  //   });
+  await t.test('Change profile => fail; invalid dto.userId.', async (t) => {
+    const {
+      body: { errors },
+    } = await gqlQuery(app, {
+      query: `mutation ($id: UUID!, $dto: ChangeProfileInput!) {
+        changeProfile(id: $id, dto: $dto) {
+            id
+        }
+    }`,
+      variables: {
+        id: randomUUID(),
+        dto: {
+          userId: randomUUID(),
+        },
+      },
+    });
 
-  //   t.ok(errors.length === 1);
-  //   const message = errors[0].message as string;
-  //   t.ok(
-  //     message.includes(`Field \"userId\" is not defined by type \"ChangeProfileInput\"`),
-  //   );
-  // });
+    t.ok(errors.length === 1);
+    const message = errors[0].message as string;
+    t.ok(
+      message.includes(`Field \"userId\" is not defined by type \"ChangeProfileInput\"`),
+    );
+  });
 
   // await t.test('Subs mutations.', async (t) => {
   //   const { body: user1 } = await createUser(app);
