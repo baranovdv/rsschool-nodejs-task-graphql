@@ -10,11 +10,15 @@ export type CreateUser = {
   balance: number;
 }
 
+export type ChangeUser = Partial<CreateUser>;
+
 export type CreatePost = {
   title: string;
   content: string;
   authorId: string;
 }
+
+export type ChangePost = Partial<CreatePost>;
 
 export type CreateProfile = {
   isMale: boolean;
@@ -22,3 +26,5 @@ export type CreateProfile = {
   userId: string;
   memberTypeId: MemberTypeId;
 }
+
+export type ChangeProfile = Partial<CreateProfile>;
