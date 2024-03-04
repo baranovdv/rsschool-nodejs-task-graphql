@@ -60,6 +60,7 @@ await test('gql-queries', async (t) => {
     t.ok(data.profiles.length === profiles.length);
   });
 
+
   await t.test('Get all resources by their id.', async (t) => {
     const { body: user1 } = await createUser(app);
     const { body: post1 } = await createPost(app, user1.id);
