@@ -1,7 +1,6 @@
 import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLResolveInfo } from "graphql";
 import { UUIDType } from "../uuid.js";
 import { MemberTypeIdType } from "../memberType/memberTypeId.js";
-import { PrismaClient } from "@prisma/client";
 import { profileSchema } from "../../../profiles/schemas.js";
 import { MemberTypesType } from "../memberType/memberType.js";
 import { ContextValueType } from "../common.js";
@@ -50,18 +49,8 @@ export const ProfileType = new GraphQLObjectType({
           dataloaders.set(info.fieldNodes, dataloader);
         }
 
-        return dataloader.load(rootQuery.id as string);
+        return dataloader.load(rootQuery.memberTypeId as string);
       }
-
-      // resolve: async (rootQuery, _, context: {prisma: PrismaClient}) => {
-      //   const memberType = await context.prisma.memberType.findUnique({
-      //     where: {
-      //       id: (rootQuery as typeof profileSchema).memberTypeId as string,
-      //     },
-      //   });
-
-      //   return memberType;
-      // }
     }
   })
 })

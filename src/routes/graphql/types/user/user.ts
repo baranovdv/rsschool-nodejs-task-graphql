@@ -2,7 +2,7 @@ import { GraphQLFloat, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLRe
 import { UUIDType } from "../uuid.js";
 import { ProfileType } from "../profile/profile.js";
 import { PostType } from "../post/post.js";
-import { ContextValueType } from "../common.js";
+import { ContextValueType, User } from "../common.js";
 import DataLoader from "dataloader";
 
 export const UserType: GraphQLObjectType<{
@@ -68,9 +68,19 @@ export const UserType: GraphQLObjectType<{
               },
             })
 
-            const sortedInOrder = ids.map(id => posts.find(post => post.id === id));
-    
-            return sortedInOrder;
+            const authors: Record<string, typeof posts> = {}
+
+            posts.forEach((post) => {
+              if (authors[post.authorId] === undefined) {
+                authors[post.authorId] = []
+              }
+
+              authors[post.authorId].push(post)
+            })
+
+            const sortedInOrder = ids.map((id) => authors[id])
+      
+          return sortedInOrder
           });
 
           dataloaders.set(info.fieldNodes, dataloader);
@@ -89,7 +99,6 @@ export const UserType: GraphQLObjectType<{
 
         if (!dataloader) {
           dataloader = new DataLoader(async (ids: readonly string[]) => {
-
             const users = await prisma.user.findMany({
               where: {
                 userSubscribedTo: {
@@ -103,9 +112,23 @@ export const UserType: GraphQLObjectType<{
               },
             })
 
-            const sortedInOrder = ids.map(id => users.find(((user) => user.userSubscribedTo['subscriberId'] === id)) || []);
+            const subscribers: Record<string, User[]> = {}
 
-            return sortedInOrder;
+            users.forEach((user) => {
+              user.userSubscribedTo.forEach((sub) => {
+                const author = sub.authorId
+
+                if (subscribers[author] === undefined) {
+                  subscribers[author] = []
+                }
+  
+                subscribers[author].push(user)
+              })
+            })
+
+            const sortedInOrder = ids.map((id) => subscribers[id] || [])
+
+            return sortedInOrder
           });
 
           dataloaders.set(info.fieldNodes, dataloader);
@@ -138,11 +161,23 @@ export const UserType: GraphQLObjectType<{
               },
             })
 
-            const sortedInOrder = ids.map(id => users.find(((user) => user.subscribedToUser['authorId'] === id)) || []);
+            const authors: Record<string, User[]> = {}
 
-            // console.log(sortedInOrder)
+            users.forEach((user) => {
+              user.subscribedToUser.forEach((sub) => {
+                const author = sub.subscriberId
 
-            return sortedInOrder;
+                if (authors[author] === undefined) {
+                  authors[author] = []
+                }
+  
+                authors[author].push(user)
+              })
+            })
+
+            const sortedInOrder = ids.map((id) => authors[id] || [])
+
+            return sortedInOrder
           });
 
           dataloaders.set(info.fieldNodes, dataloader);

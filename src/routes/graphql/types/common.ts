@@ -7,6 +7,12 @@ export type RequestArgs = {
   memberTypeId?: MemberTypeId;
 }
 
+export type User = {
+  id: string;
+  name: string;
+  balance: number;
+}
+
 export type CreateUser = {
   name: string;
   balance: number;
