@@ -3,7 +3,7 @@ import { Static } from '@sinclair/typebox';
 import {
   createGqlResponseSchema,
   gqlResponseSchema,
-} from '../../src/routes/graphql/schemas.js';
+} from '../../src/routes/graphql/schemas/schemas.js';
 import { genCreatePostDto, genCreateProfileDto, genCreateUserDto } from './fake.js';
 import { userSchema } from '../../src/routes/users/schemas.js';
 import { profileSchema } from '../../src/routes/profiles/schemas.js';
