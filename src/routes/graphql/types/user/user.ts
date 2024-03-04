@@ -25,9 +25,9 @@ export const UserType: GraphQLObjectType<{
 
     profile: {
       type: ProfileType,
-      resolve: async (rootQuery, _, context: PrismaClient) => {
+      resolve: async (rootQuery, _, context: {prisma: PrismaClient}) => {
 
-        const profile = await context.profile.findUnique({
+        const profile = await context.prisma.profile.findUnique({
           where: {
             userId: rootQuery.id,
           },
@@ -39,8 +39,8 @@ export const UserType: GraphQLObjectType<{
 
     posts: {
       type: new GraphQLList(PostType),
-      resolve: async (rootQuery, __, context: PrismaClient) => {
-        const posts = await context.post.findMany({
+      resolve: async (rootQuery, __, context: {prisma: PrismaClient}) => {
+        const posts = await context.prisma.post.findMany({
           where: {
             authorId: rootQuery.id,
           },
@@ -52,8 +52,8 @@ export const UserType: GraphQLObjectType<{
 
     subscribedToUser: {
       type: new GraphQLList(UserType),
-      resolve: async(rootQuery, _, context: PrismaClient) => {
-        const users = context.user.findMany({
+      resolve: async(rootQuery, _, context: {prisma: PrismaClient}) => {
+        const users = context.prisma.user.findMany({
           where: {
             userSubscribedTo: {
               some: {
@@ -69,8 +69,8 @@ export const UserType: GraphQLObjectType<{
 
     userSubscribedTo: {
       type: new GraphQLList(UserType),
-      resolve: async(rootQuery, _, context: PrismaClient) => {
-        const users = context.user.findMany({
+      resolve: async(rootQuery, _, context: {prisma: PrismaClient}) => {
+        const users = context.prisma.user.findMany({
           where: {
             subscribedToUser: {
               some: {

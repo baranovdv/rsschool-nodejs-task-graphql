@@ -32,7 +32,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       const validationResult = validate(schema, parse(source), [depthLimit(QUERY_DEPTH_LIMIT)])
 
 
-      if (validationResult.length !== 0) {
+      if (validationResult.length > 0) {
         const result: ExecutionResult<ObjMap<unknown>, ObjMap<unknown>> = {
           errors: validationResult
         }
@@ -40,7 +40,8 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         return result
       }
 
-      const result = await graphql({schema, source, variableValues, contextValue: prisma })
+      const result = await graphql({schema, source, variableValues, contextValue: {prisma, dataloaders: new WeakMap()} })
+
       return result;
     },
   });

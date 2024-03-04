@@ -25,8 +25,8 @@ export const ProfileType = new GraphQLObjectType({
     },
     memberType: {
       type: MemberTypesType,
-      resolve: async (rootQuery, _, context: PrismaClient) => {
-        const memberType = await context.memberType.findUnique({
+      resolve: async (rootQuery, _, context: {prisma: PrismaClient}) => {
+        const memberType = await context.prisma.memberType.findUnique({
           where: {
             id: (rootQuery as typeof profileSchema).memberTypeId as string,
           },
