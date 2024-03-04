@@ -5,7 +5,8 @@ import { PostType } from '../types/post/post.js';
 import { ProfileType } from '../types/profile/profile.js';
 import { UUIDType } from './../types/uuid.js';
 import { MemberTypeIdType } from '../types/memberType/memberTypeId.js';
-import { ContextValueType } from '../types/common.js';
+import { ContextValueType, User } from '../types/common.js';
+import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
 
 export const rootQuery = new GraphQLObjectType({
   name: 'Query',
@@ -20,9 +21,49 @@ export const rootQuery = new GraphQLObjectType({
     users: {
       type: new GraphQLList(UserType),
       resolve: async (_, __, context: ContextValueType, info: GraphQLResolveInfo) => {
-        // const {prisma, dataloaders} = context
+        const {prisma, dataloaders} = context
 
-        return context.prisma.user.findMany();
+        const resolveInfo = simplifyParsedResolveInfoFragmentWithType(
+          parseResolveInfo(info) as ResolveTree,
+          info.returnType,
+        );
+  
+        const isUserSubscribeInQuery = 'userSubscribedTo' in resolveInfo.fields;
+
+        const isSubscribeToInQuery = 'subscribedToUser' in resolveInfo.fields;
+  
+        const users = await prisma.user.findMany({
+          include: {
+            userSubscribedTo: isUserSubscribeInQuery,
+            subscribedToUser: isSubscribeToInQuery,
+          },
+        });
+  
+        if (isUserSubscribeInQuery || isSubscribeToInQuery) {
+          const usersList: Record<string, User> = {} 
+  
+          users.forEach((user) => {
+            usersList[user.id] = user
+          })
+  
+          users.forEach((user) => {
+            if (isUserSubscribeInQuery) {
+              dataloaders.userSubscribeTo.prime(
+                user.id,
+                user.userSubscribedTo.map((sub) => usersList[sub.authorId]),
+              )
+            }
+  
+            if (isSubscribeToInQuery) {
+              dataloaders.subscribeToUser.prime(
+                user.id,
+                user.subscribedToUser.map((sub) => usersList[sub.subscriberId]),
+              )
+            }
+          })
+        }
+  
+        return users;
       }
     },
 
