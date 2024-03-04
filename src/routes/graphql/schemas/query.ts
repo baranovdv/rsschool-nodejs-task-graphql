@@ -4,7 +4,7 @@ import { MemberTypesType } from '../types/memberType/memberType.js';
 import { PostType } from '../types/post/post.js';
 import { ProfileType } from '../types/profile/profile.js';
 import { UUIDType } from './../types/uuid.js';
-import { MemberTypeIdType } from './../types/memberTypeId.js';
+import { MemberTypeIdType } from '../types/memberType/memberTypeId.js';
 import { PrismaClient } from '@prisma/client';
 
 export const rootQuery = new GraphQLObjectType({

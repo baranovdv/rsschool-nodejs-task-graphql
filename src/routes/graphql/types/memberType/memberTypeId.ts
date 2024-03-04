@@ -1,5 +1,5 @@
 import { GraphQLScalarType, Kind } from 'graphql';
-import { MemberTypeId } from '../../member-types/schemas.js';
+import { MemberTypeId } from '../../../member-types/schemas.js';
 
 const isMemberTypeId = (value: unknown): value is string =>
   Object.values(MemberTypeId).includes(value as MemberTypeId);
