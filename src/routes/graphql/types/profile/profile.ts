@@ -1,9 +1,11 @@
-import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType } from "graphql";
+import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLResolveInfo } from "graphql";
 import { UUIDType } from "../uuid.js";
 import { MemberTypeIdType } from "../memberType/memberTypeId.js";
 import { PrismaClient } from "@prisma/client";
 import { profileSchema } from "../../../profiles/schemas.js";
 import { MemberTypesType } from "../memberType/memberType.js";
+import { ContextValueType } from "../common.js";
+import DataLoader from "dataloader";
 
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
@@ -25,15 +27,41 @@ export const ProfileType = new GraphQLObjectType({
     },
     memberType: {
       type: MemberTypesType,
-      resolve: async (rootQuery, _, context: {prisma: PrismaClient}) => {
-        const memberType = await context.prisma.memberType.findUnique({
-          where: {
-            id: (rootQuery as typeof profileSchema).memberTypeId as string,
-          },
-        });
 
-        return memberType;
+      resolve: async (rootQuery: typeof profileSchema, _, context: ContextValueType, info: GraphQLResolveInfo) => {
+        const {prisma, dataloaders} = context
+
+        let dataloader = dataloaders.get(info.fieldNodes);
+
+        if (!dataloader) {
+          dataloader = new DataLoader(async (ids: readonly string[]) => {
+
+            const memberTypes = await prisma.memberType.findMany({
+              where: {
+                id: { in: ids as string[] },
+              },
+            })
+
+            const sortedInOrder = ids.map(id => memberTypes.find(memberType => memberType.id === id));
+    
+            return sortedInOrder;
+          });
+
+          dataloaders.set(info.fieldNodes, dataloader);
+        }
+
+        return dataloader.load(rootQuery.id as string);
       }
+
+      // resolve: async (rootQuery, _, context: {prisma: PrismaClient}) => {
+      //   const memberType = await context.prisma.memberType.findUnique({
+      //     where: {
+      //       id: (rootQuery as typeof profileSchema).memberTypeId as string,
+      //     },
+      //   });
+
+      //   return memberType;
+      // }
     }
   })
 })

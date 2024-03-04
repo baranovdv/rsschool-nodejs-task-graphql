@@ -26,6 +26,11 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         mutation: rootMutation,
       })
 
+      const contextValue = {
+        prisma,
+        dataloaders: new WeakMap()
+      }
+
       const source = req.body.query
       const variableValues = req.body.variables
 
@@ -40,7 +45,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         return result
       }
 
-      const result = await graphql({schema, source, variableValues, contextValue: {prisma, dataloaders: new WeakMap()} })
+      const result = await graphql({schema, source, variableValues, contextValue })
 
       return result;
     },

@@ -1,8 +1,9 @@
-import { GraphQLFloat, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
+import { GraphQLFloat, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLResolveInfo, GraphQLString } from "graphql";
 import { UUIDType } from "../uuid.js";
 import { ProfileType } from "../profile/profile.js";
-import { PrismaClient } from "@prisma/client";
 import { PostType } from "../post/post.js";
+import { ContextValueType } from "../common.js";
+import DataLoader from "dataloader";
 
 export const UserType: GraphQLObjectType<{
   id: string,
@@ -25,62 +26,127 @@ export const UserType: GraphQLObjectType<{
 
     profile: {
       type: ProfileType,
-      resolve: async (rootQuery, _, context: {prisma: PrismaClient}) => {
+      resolve: async (rootQuery, _, context: ContextValueType, info: GraphQLResolveInfo) => {
+        const {prisma, dataloaders} = context
 
-        const profile = await context.prisma.profile.findUnique({
-          where: {
-            userId: rootQuery.id,
-          },
-        });
+        let dataloader = dataloaders.get(info.fieldNodes);
 
-        return profile;
+        if (!dataloader) {
+          dataloader = new DataLoader(async (ids: readonly string[]) => {
+
+            const profiles = await prisma.profile.findMany({
+              where: {
+                userId: { in: ids as string[] },
+              },
+            })
+
+            const sortedInOrder = ids.map(id => profiles.find(profile => profile.userId === id));
+    
+            return sortedInOrder;
+          });
+
+          dataloaders.set(info.fieldNodes, dataloader);
+        }
+
+        return dataloader.load(rootQuery.id);
       }
     },
 
     posts: {
       type: new GraphQLList(PostType),
-      resolve: async (rootQuery, __, context: {prisma: PrismaClient}) => {
-        const posts = await context.prisma.post.findMany({
-          where: {
-            authorId: rootQuery.id,
-          },
-        });
+      resolve: async (rootQuery, _, context: ContextValueType, info: GraphQLResolveInfo) => {
+        const {prisma, dataloaders} = context
 
-        return posts;
+        let dataloader = dataloaders.get(info.fieldNodes);
+
+        if (!dataloader) {
+          dataloader = new DataLoader(async (ids: readonly string[]) => {
+
+            const posts = await prisma.post.findMany({
+              where: {
+                authorId: { in: ids as string[] },
+              },
+            })
+
+            const sortedInOrder = ids.map(id => posts.find(post => post.id === id));
+    
+            return sortedInOrder;
+          });
+
+          dataloaders.set(info.fieldNodes, dataloader);
+        }
+
+        return dataloader.load(rootQuery.id);
       }
     },
 
     subscribedToUser: {
       type: new GraphQLList(UserType),
-      resolve: async(rootQuery, _, context: {prisma: PrismaClient}) => {
-        const users = context.prisma.user.findMany({
-          where: {
-            userSubscribedTo: {
-              some: {
-                authorId: rootQuery.id,
-              },
-            },
-          },
-        });
+      resolve: async (rootQuery, _, context: ContextValueType, info: GraphQLResolveInfo) => {
+        const {prisma, dataloaders} = context
 
-        return users;
+        let dataloader = dataloaders.get(info.fieldNodes);
+
+        if (!dataloader) {
+          dataloader = new DataLoader(async (ids: readonly string[]) => {
+
+            const users = await prisma.user.findMany({
+              where: {
+                userSubscribedTo: {
+                  some: {
+                    authorId: { in: ids as string[] },
+                  },
+                },
+              },
+              include: {
+                userSubscribedTo: true,
+              },
+            })
+
+            const sortedInOrder = ids.map(id => users.find(user => user.userSubscribedTo['subscriberId'] === id));
+    
+            return sortedInOrder;
+          });
+
+          dataloaders.set(info.fieldNodes, dataloader);
+        }
+
+        return dataloader.load(rootQuery.id);
       }
     },
 
     userSubscribedTo: {
       type: new GraphQLList(UserType),
-      resolve: async(rootQuery, _, context: {prisma: PrismaClient}) => {
-        const users = context.prisma.user.findMany({
-          where: {
-            subscribedToUser: {
-              some: {
-                subscriberId: rootQuery.id,
-              },
-            },
-          },
-        });
+      resolve: async (rootQuery, _, context: ContextValueType, info: GraphQLResolveInfo) => {
+        const {prisma, dataloaders} = context
 
-        return users;
+        let dataloader = dataloaders.get(info.fieldNodes);
+
+        if (!dataloader) {
+          dataloader = new DataLoader(async (ids: readonly string[]) => {
+
+            const users = await prisma.user.findMany({
+              where: {
+                subscribedToUser: {
+                  some: {
+                    subscriberId: { in: ids as string[] },
+                  },
+                },
+              },
+              include: {
+                subscribedToUser: true,
+              },
+            })
+
+            const sortedInOrder = ids.map(id => users.find(user => user.subscribedToUser['authorId'] === id));
+
+            return sortedInOrder;
+          });
+
+          dataloaders.set(info.fieldNodes, dataloader);
+        }
+
+        return dataloader.load(rootQuery.id);
       }
     }
   })

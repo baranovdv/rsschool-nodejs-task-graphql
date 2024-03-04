@@ -1,4 +1,6 @@
+import { PrismaClient } from "@prisma/client";
 import { MemberTypeId } from "../../member-types/schemas.js";
+import DataLoader from "dataloader";
 
 export type RequestArgs = {
   id?: string;
@@ -28,3 +30,8 @@ export type CreateProfile = {
 }
 
 export type ChangeProfile = Partial<CreateProfile>;
+
+export type ContextValueType = {
+  prisma: PrismaClient,
+  dataloaders: WeakMap<WeakKey, DataLoader<unknown, unknown, unknown>>
+}
