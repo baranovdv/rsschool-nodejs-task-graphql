@@ -103,8 +103,8 @@ export const UserType: GraphQLObjectType<{
               },
             })
 
-            const sortedInOrder = ids.map(id => users.find(user => user.userSubscribedTo['subscriberId'] === id));
-    
+            const sortedInOrder = ids.map(id => users.find(((user) => user.userSubscribedTo['subscriberId'] === id)) || []);
+
             return sortedInOrder;
           });
 
@@ -138,7 +138,9 @@ export const UserType: GraphQLObjectType<{
               },
             })
 
-            const sortedInOrder = ids.map(id => users.find(user => user.subscribedToUser['authorId'] === id));
+            const sortedInOrder = ids.map(id => users.find(((user) => user.subscribedToUser['authorId'] === id)) || []);
+
+            // console.log(sortedInOrder)
 
             return sortedInOrder;
           });
