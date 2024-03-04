@@ -5,6 +5,7 @@ import { rootQuery } from './schemas/query.js';
 import { rootMutation } from './schemas/mutation.js';
 import depthLimit from 'graphql-depth-limit';
 import { ObjMap } from 'graphql/jsutils/ObjMap.js';
+import { getLoaders } from './loaders/getLoaders.js';
 
 const QUERY_DEPTH_LIMIT = 5;
 
@@ -26,9 +27,11 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         mutation: rootMutation,
       })
 
+      const dataloaders = getLoaders(prisma)
+
       const contextValue = {
         prisma,
-        dataloaders: new WeakMap()
+        dataloaders
       }
 
       const source = req.body.query

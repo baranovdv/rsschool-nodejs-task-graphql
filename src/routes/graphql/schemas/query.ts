@@ -1,4 +1,4 @@
-import { GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLResolveInfo } from 'graphql';
 import { UserType } from '../types/user/user.js';
 import { MemberTypesType } from '../types/memberType/memberType.js';
 import { PostType } from '../types/post/post.js';
@@ -19,7 +19,9 @@ export const rootQuery = new GraphQLObjectType({
 
     users: {
       type: new GraphQLList(UserType),
-      resolve: async (_, __, context: ContextValueType) => {
+      resolve: async (_, __, context: ContextValueType, info: GraphQLResolveInfo) => {
+        // const {prisma, dataloaders} = context
+
         return context.prisma.user.findMany();
       }
     },

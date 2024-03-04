@@ -39,5 +39,26 @@ export type ChangeProfile = Partial<CreateProfile>;
 
 export type ContextValueType = {
   prisma: PrismaClient,
-  dataloaders: WeakMap<WeakKey, DataLoader<unknown, unknown, unknown>>
+  dataloaders: {
+    memberLoader: DataLoader<string, {
+      id: string;
+      discount: number;
+      postsLimitPerMonth: number;
+  } | undefined, string>,
+    postsLoader: DataLoader<string, {
+      id: string;
+      title: string;
+      content: string;
+      authorId: string;
+  }[], string>,
+  profileLoader: DataLoader<string, {
+    id: string;
+    isMale: boolean;
+    yearOfBirth: number;
+    userId: string;
+    memberTypeId: string;
+  } | undefined, string>,
+    subscribeToUser: DataLoader<string, User[], string>,
+    userSubscribeTo: DataLoader<string, User[], string>
+  }
 }
